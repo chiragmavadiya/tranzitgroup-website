@@ -1,26 +1,346 @@
 @import "tailwindcss";
 
+/*
+ * Design tokens follow the Transp logistics template (Epilogue, square corners,
+ * navy + accent, pale tinted bands) mapped onto Tranzit Group's brand colours.
+ */
+@theme {
+  --color-navy: #132f56;
+  --color-navy-700: #1c4173;
+  --color-navy-800: #10284a;
+  --color-navy-900: #0b1d38;
+  --color-orange: #e99322;
+  --color-orange-deep: #cf7e12;
+  --color-orange-light: #f6b85a;
+  --color-sand: #fde6c2; /* Transp pale yellow band (#ffe799) in Tranzit orange */
+  --color-sky: #e3edf6; /* Transp pale blue band (#e0f0f6) in Tranzit navy */
+  --color-ink: #0b1d38;
+  --color-muted: #5b647c;
+  --color-muted-light: #8c99ac;
+  --color-surface: #f2f3f4;
+  --color-surface-2: #e8e9ed;
+  --color-line: #cde2e7;
+  --color-line-soft: #e8e9ed;
+
+  --font-heading: var(--font-epilogue), system-ui, sans-serif;
+  --font-body: var(--font-epilogue), system-ui, sans-serif;
+  --font-mono: var(--font-space-mono), ui-monospace, monospace;
+
+  --radius-xs: 0px;
+  --radius-sm: 2px;
+  --radius-md: 2px;
+  --radius-lg: 2px;
+
+  --shadow-card: 0 5px 30px rgba(19, 27, 34, 0.12);
+  --shadow-card-hover: 0 10px 42px rgba(1, 9, 20, 0.16);
+  --shadow-float: 0 24px 50px -20px rgba(11, 29, 56, 0.4);
+  --shadow-button: 0 8px 18px -10px rgba(11, 29, 56, 0.45);
+
+  /* Motion curve, exposed as the `ease-smooth` utility. */
+  --ease-smooth: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Motion tokens. One curve for everything: smooth ease-out, no overshoot. */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --ease-smooth: cubic-bezier(0.22, 1, 0.36, 1);
+  --motion-fast: 260ms; /* hover and press feedback */
+  --motion-medium: 400ms; /* menus, accordions */
+  --motion-reveal: 950ms; /* section entrances */
+  --motion-stagger: 120ms; /* between related items, capped at 6 steps */
+  --motion-distance: 28px; /* entrance travel */
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 24px;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
   }
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: #ffffff;
+  color: var(--color-ink);
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.75;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+@layer base {
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-heading);
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    line-height: 1.15;
+    color: var(--color-navy);
+  }
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-orange);
+  outline-offset: 3px;
+}
+
+/* Dotted world-map style texture (Transp uses a dotted map behind sections) */
+.dots-dark {
+  background-image: radial-gradient(rgba(255, 255, 255, 0.12) 1.2px, transparent 1.2px);
+  background-size: 18px 18px;
+}
+.dots-light {
+  background-image: radial-gradient(rgba(19, 47, 86, 0.1) 1.2px, transparent 1.2px);
+  background-size: 18px 18px;
+}
+
+/* Angled accent shapes */
+.slash {
+  clip-path: polygon(30% 0, 100% 0, 70% 100%, 0 100%);
+}
+.para-left {
+  clip-path: polygon(6% 0, 100% 0, 94% 100%, 0 100%);
+}
+.diag-cut-left {
+  clip-path: polygon(22% 0, 100% 0, 100% 100%, 0 100%);
+}
+.diag-cut-right {
+  clip-path: polygon(0 0, 100% 0, 78% 100%, 0 100%);
+}
+
+/* Marker highlight */
+.highlight {
+  color: var(--color-orange);
+}
+
+/* Marquee */
+@keyframes marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+.marquee-track {
+  display: flex;
+  width: max-content;
+  animation: marquee 45s linear infinite;
+}
+.marquee:hover .marquee-track,
+.marquee:focus-within .marquee-track {
+  animation-play-state: paused;
+}
+@media (prefers-reduced-motion: reduce) {
+  .marquee-track {
+    animation: none;
+  }
+}
+
+/* Legal prose */
+.prose-legal h2 {
+  font-size: 1.5rem;
+  margin-top: 2.25rem;
+  margin-bottom: 0.75rem;
+}
+.prose-legal p {
+  margin-bottom: 1rem;
+  line-height: 1.75;
+  color: var(--color-muted);
+}
+.prose-legal .legal-list,
+.prose-legal .legal-olist {
+  padding-left: 1.5rem;
+  margin-bottom: 1rem;
+  color: var(--color-muted);
+}
+.prose-legal .legal-list {
+  list-style: disc;
+}
+.prose-legal .legal-olist {
+  list-style: decimal;
+}
+.prose-legal .legal-list > li,
+.prose-legal .legal-olist > li {
+  margin-bottom: 0.5rem;
+  line-height: 1.7;
+}
+.prose-legal .legal-list > li::marker,
+.prose-legal .legal-olist > li::marker {
+  color: var(--color-orange-deep);
+  font-weight: 600;
+}
+.prose-legal a {
+  color: var(--color-navy);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.prose-legal strong {
+  color: var(--color-navy);
+  font-weight: 600;
+}
+
+/* =========================================================================
+ * Motion system
+ * -------------------------------------------------------------------------
+ * - The `motion` class is added to <html> by RevealObserver after hydration, only
+ *   when the user has not asked for reduced motion. Content already on screen is
+ *   marked `is-in is-static` first, so it never hides or replays. Without JS,
+ *   nothing is hidden.
+ * - Reveals use keyframe animations with `backwards` fill, so after the
+ *   entrance the element returns to its own styles and hover transitions
+ *   (lifts, shadows) keep working normally.
+ * ========================================================================= */
+
+@keyframes reveal-up {
+  from {
+    opacity: 0;
+    transform: translate3d(0, var(--motion-distance), 0);
+  }
+}
+@keyframes reveal-left {
+  from {
+    opacity: 0;
+    transform: translate3d(calc(var(--motion-distance) * -1.3), 0, 0);
+  }
+}
+@keyframes reveal-right {
+  from {
+    opacity: 0;
+    transform: translate3d(calc(var(--motion-distance) * 1.3), 0, 0);
+  }
+}
+@keyframes reveal-scale {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 16px, 0) scale(0.97);
+  }
+}
+@keyframes reveal-fade {
+  from {
+    opacity: 0;
+  }
+}
+
+/* Hidden only while waiting to enter. */
+.motion [data-reveal]:not(.is-in),
+.motion [data-reveal-group]:not(.is-in) > * {
+  opacity: 0;
+}
+
+.motion [data-reveal].is-in,
+.motion [data-reveal-group].is-in > * {
+  animation: reveal-up var(--motion-reveal) var(--ease-smooth) backwards;
+  animation-delay: var(--reveal-delay, 0ms);
+}
+.motion [data-reveal="left"].is-in {
+  animation-name: reveal-left;
+}
+.motion [data-reveal="right"].is-in {
+  animation-name: reveal-right;
+}
+.motion [data-reveal="scale"].is-in {
+  animation-name: reveal-scale;
+  animation-duration: 1100ms;
+}
+.motion [data-reveal="fade"].is-in {
+  animation-name: reveal-fade;
+}
+/* Already on screen at first load: shown as painted, no entrance. */
+.motion [data-reveal].is-static,
+.motion [data-reveal-group].is-static > * {
+  animation: none;
+}
+
+/* Stagger: children of a group cascade, capped at 6 steps (~720ms). */
+[data-reveal-group] > :nth-child(2) { --reveal-delay: calc(var(--motion-stagger) * 1); }
+[data-reveal-group] > :nth-child(3) { --reveal-delay: calc(var(--motion-stagger) * 2); }
+[data-reveal-group] > :nth-child(4) { --reveal-delay: calc(var(--motion-stagger) * 3); }
+[data-reveal-group] > :nth-child(5) { --reveal-delay: calc(var(--motion-stagger) * 4); }
+[data-reveal-group] > :nth-child(6) { --reveal-delay: calc(var(--motion-stagger) * 5); }
+[data-reveal-group] > :nth-child(n + 7) { --reveal-delay: calc(var(--motion-stagger) * 6); }
+
+/* Optional small offset for a second element revealed alongside a first. */
+[data-reveal-delay="1"] { --reveal-delay: 150ms; }
+[data-reveal-delay="2"] { --reveal-delay: 300ms; }
+
+/*
+ * Hero sequence: pure CSS, starts as soon as the HTML paints (no hydration wait).
+ * The main heading is never animated. Sequence ends at about 1.5s.
+ */
+@keyframes hero-rise {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 22px, 0);
+  }
+}
+@keyframes hero-visual {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 24px, 0) scale(0.97);
+  }
+}
+.hero-seq {
+  animation: hero-rise 950ms var(--ease-smooth) backwards;
+}
+.hero-seq-1 { animation-delay: 150ms; }
+.hero-seq-2 { animation-delay: 350ms; }
+.hero-seq-3 { animation-delay: 550ms; }
+.hero-visual {
+  animation: hero-visual 1150ms var(--ease-smooth) 250ms backwards;
+}
+
+/* Reduced motion: no entrances, no smooth scroll, instant state changes. */
+@media (prefers-reduced-motion: reduce) {
+  .hero-seq,
+  .hero-visual,
+  .motion [data-reveal].is-in,
+  .motion [data-reveal-group].is-in > * {
+    animation: none !important;
+  }
+  .motion [data-reveal]:not(.is-in),
+  .motion [data-reveal-group]:not(.is-in) > * {
+    opacity: 1;
+  }
+}
+
+/* Print: never print hidden content or mid-animation states. */
+@media print {
+  .motion [data-reveal]:not(.is-in),
+  .motion [data-reveal-group]:not(.is-in) > * {
+    opacity: 1 !important;
+  }
+  .motion [data-reveal].is-in,
+  .motion [data-reveal-group].is-in > *,
+  .hero-seq,
+  .hero-visual {
+    animation: none !important;
+  }
+}
+
+/*
+ * Optical centring for button labels. Epilogue reserves more space below the glyphs than
+ * above, so text centred by its line box sits ~0.12em high inside a fixed-height button.
+ * This nudges the label down by that amount; icons stay geometrically centred and line up.
+ */
+.btn-label {
+  position: relative;
+  top: 0.12em;
+}
+
+/* Side-entering reveals travel ~36px; clip them so no browser can pan sideways mid-animation. */
+main {
+  overflow-x: clip;
 }
